@@ -2,18 +2,6 @@
 #include <cstdint>
 #include <cstdio>
 
-xyzFloat::xyzFloat()
-    : xyzFloat(0.f, 0.f, 0.f)
-{
-}
-
-xyzFloat::xyzFloat(float const x, float const y, float const z)
-    : x(x)
-    , y(y)
-    , z(z)
-{
-}
-
 uint8_t constexpr HMC5883L::REGISTER_CONFIG_A   ;
 uint8_t constexpr HMC5883L::REGISTER_CONFIG_B   ;
 uint8_t constexpr HMC5883L::REGISTER_REG_MODE   ;
@@ -58,12 +46,6 @@ bool HMC5883L::init(){
 
 xyzFloat HMC5883L::getMagneticField(){
     return readMagneticField();
-}
-
-void HMC5883L::setCalibrationParameters(float offX, float offY, float offZ){
-    _offset.x = offX;
-    _offset.y = offY;
-    _offset.z = offZ;
 }
 
 /* Protected functions */
@@ -120,6 +102,8 @@ bool HMC5883L::dataReady(){
 /* Private functions */
 
 xyzFloat HMC5883L::readMagneticField(){
+    // Measurement in [gauss]
+    // 10000 gauss = 1 tesla
     xyzFloat measurement;
 
     char request[1] = {REGISTER_DO_X_MSB};
@@ -131,6 +115,9 @@ xyzFloat HMC5883L::readMagneticField(){
     measurement.x = (int16_t)((recievedData[0] << 8) | recievedData[1]) * _resolution;
     measurement.y = (int16_t)((recievedData[2] << 8) | recievedData[3]) * _resolution;
     measurement.z = (int16_t)((recievedData[4] << 8) | recievedData[5]) * _resolution;
+
+    // Gauss to tesla
+    measurement /= 10e3;
 
     return measurement;
 }
@@ -162,11 +149,4 @@ void HMC5883L::updateResolution(uint8_t rangeType){
             _resolution = 4.35;
             break;
     }
-}
-
-/* Other functions */
-void printByte(char byte) {
-  printf("0b");
-  for (int i = 7; i >= 0; --i)
-    printf("%d", (byte >> i) & 1);
 }

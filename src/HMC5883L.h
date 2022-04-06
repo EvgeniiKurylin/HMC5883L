@@ -2,20 +2,12 @@
 #define HMC5883L_H
 
 #include "mbed.h"
+#include "utilities.h"
 #include <stdint.h>
 
 #define HMC5883L_DEFAULT_ADDRESS    0x1E
 #define HMC5883L_WRITE_ADDRESS      (_address << 1)
 #define HMC5883L_READ_ADDRESS       ((_address << 1) | 0b00000001)
-
-struct xyzFloat{
-    float x;
-    float y;
-    float z;
-
-    xyzFloat();
-    xyzFloat(float const x, float const y, float const z);
-};
 
 class HMC5883L{
     public:
@@ -54,7 +46,6 @@ class HMC5883L{
         /* Methods */
         bool init();
         xyzFloat getMagneticField();
-        void setCalibrationParameters(float offX, float offY, float offZ);
 
     protected:
         bool init(uint8_t expectedID_A, uint8_t expectedID_B, uint8_t expectedID_C);
@@ -74,7 +65,5 @@ class HMC5883L{
         void updateResolution(uint8_t rangeType);
         xyzFloat readMagneticField();
 };
-
-void printByte(char byte);
 
 #endif
